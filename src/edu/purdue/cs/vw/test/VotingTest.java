@@ -7,12 +7,14 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import edu.purdue.cs.vw.Server;
 import edu.purdue.cs.vw.Voting;
 
 public class VotingTest extends ActivityInstrumentationTestCase2<Voting> {
     private Voting activity;
     private ListView view;
     private ListAdapter adapter;
+    private Server server;
 
     static final String PREFIX = "Number of votes: ";
     private String[] channels = { "ABC", "CNN", "ESPN", "Nickelodeon", "Comedy Central", "Sci Fi", "Weather Channel",
@@ -31,7 +33,8 @@ public class VotingTest extends ActivityInstrumentationTestCase2<Voting> {
 	java.util.Arrays.sort(channels);
 
 	setActivityInitialTouchMode(false);
-	activity = getActivity();
+	activity = this.getActivity();
+	server = activity.getServer();
 	view = activity.getListView();
 	adapter = activity.getListAdapter();
     }
@@ -39,11 +42,13 @@ public class VotingTest extends ActivityInstrumentationTestCase2<Voting> {
     public void testPreconditions() {
 	assertNotNull(view);
 	assertNotNull(adapter);
+
+	server.waitForData();
 	assertEquals(adapter.getCount(), channels.length);
     }
 
     public void testVote() {
-	// TODO: OK to remove this runOnUiThread if no longer needed.  Here for example only.
+	// TODO: OK to remove this runOnUiThread if no longer needed. Here for example only.
 	Log.d("VotingTest", "PRE runOnUiThread");
 	activity.runOnUiThread(new Runnable() {
 	    public void run() {
@@ -53,7 +58,8 @@ public class VotingTest extends ActivityInstrumentationTestCase2<Voting> {
 	Log.d("VotingTest", "POST runOnUiThread");
 
 	// Vote on each available channel.
-	
+
+	server.waitForData();
 	for (int i = 0; i < view.getCount(); i++) {
 	    LinearLayout llListItem;
 	    int countBefore, countAfter;
@@ -62,12 +68,20 @@ public class VotingTest extends ActivityInstrumentationTestCase2<Voting> {
 	    countBefore = getVoteCount(llListItem);
 
 	    TouchUtils.clickView(this, llListItem);
+
+	    // TODO: HACK!!
+	    try {
+		Thread.sleep(2000);
+	    } catch (InterruptedException e) {
+		e.printStackTrace();
+	    }
+
 	    llListItem = getListItemAndCheckChannel(i);
 	    countAfter = getVoteCount(llListItem);
 	    assertEquals(countAfter, countBefore + 1);
 	}
 
-	// TODO: OK to remove.  Use if keyboard navigation works and can be tested.
+	// TODO: OK to remove. Use if keyboard navigation works and can be tested.
 	// this.sendKeys(KeyEvent.KEYCODE_DPAD_CENTER);
     }
 
