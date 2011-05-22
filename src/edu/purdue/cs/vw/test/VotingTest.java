@@ -31,7 +31,7 @@ public class VotingTest extends ActivityInstrumentationTestCase2<Voting> {
 	java.util.Arrays.sort(channels);
 
 	setActivityInitialTouchMode(false);
-	activity = this.getActivity();
+	activity = getActivity();
 	view = activity.getListView();
 	adapter = activity.getListAdapter();
     }
