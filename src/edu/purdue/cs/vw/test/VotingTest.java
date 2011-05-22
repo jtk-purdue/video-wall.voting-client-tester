@@ -42,9 +42,10 @@ public class VotingTest extends ActivityInstrumentationTestCase2<Voting> {
     public void testPreconditions() {
 	assertNotNull(view);
 	assertNotNull(adapter);
+	assertNotNull(server);
 
 	server.waitForData();
-	assertEquals(adapter.getCount(), channels.length);
+	assertEquals(channels.length, adapter.getCount());
     }
 
     public void testVote() {
@@ -78,7 +79,7 @@ public class VotingTest extends ActivityInstrumentationTestCase2<Voting> {
 
 	    llListItem = getListItemAndCheckChannel(i);
 	    countAfter = getVoteCount(llListItem);
-	    assertEquals(countAfter, countBefore + 1);
+	    assertEquals(countBefore + 1, countAfter);
 	}
 
 	// TODO: OK to remove. Use if keyboard navigation works and can be tested.
