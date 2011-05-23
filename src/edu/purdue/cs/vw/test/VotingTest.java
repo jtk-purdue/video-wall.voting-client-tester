@@ -70,9 +70,10 @@ public class VotingTest extends ActivityInstrumentationTestCase2<Voting> {
 
 	    TouchUtils.clickView(this, llListItem);
 
-	    // TODO: HACK!!
+	    // TODO: HACK!!  Ensures that any server delays or pop-up toast delays don't prevent
+	    // this code from completing ahead of the client, causing a failure at onPause() time.
 	    try {
-		Thread.sleep(2000);
+		Thread.sleep(500);
 	    } catch (InterruptedException e) {
 		e.printStackTrace();
 	    }
