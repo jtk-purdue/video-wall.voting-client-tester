@@ -2,19 +2,18 @@ package edu.purdue.cs.vw.test;
 
 import java.util.ArrayList;
 
-import android.net.ConnectivityManager;
 import android.util.Log;
 import edu.purdue.cs.vw.Server;
 
 public class MockServer extends Server {
+    private String[] channels = { "ABC", "CNN", "ESPN", "Nickelodeon", "Comedy Central", "Sci Fi", "Weather Channel",
+    "National Geographic" };
 
-    MockServer(String serverLocation, int portnum, ConnectivityManager cm) {
-	super(serverLocation, portnum, cm);
-	// TODO Auto-generated constructor stub
+    MockServer() {
     }
+
     @Override
     public void vote(String name) {
-	// TODO Auto-generated method stub
 	Log.d("ServerTest", "vote " + name);
     }
 
@@ -22,10 +21,8 @@ public class MockServer extends Server {
     public ArrayList<String> getList() {
 	Log.d("ServerTest", "get");
 	ArrayList<String> voteList = new ArrayList<String>();
-	voteList.add("ABC");
-	voteList.add("CBS");
-	voteList.add("FOX");
-	voteList.add("NBC");
+	for (int i = 0; i < channels.length; i++) 
+	    voteList.add(channels[i]);
 	return voteList;
     }
 
@@ -33,10 +30,8 @@ public class MockServer extends Server {
     public ArrayList<String> getCount() {
 	Log.d("ServerTest", "getCount");
 	ArrayList<String> votes = new ArrayList<String>();
-	votes.add("0");
-	votes.add("0");
-	votes.add("0");
-	votes.add("0");
+	for (int i = 0; i < channels.length; i++)
+	    votes.add("0");
 	return votes;
     }
 

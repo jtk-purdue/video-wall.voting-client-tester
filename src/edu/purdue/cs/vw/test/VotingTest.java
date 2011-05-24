@@ -16,7 +16,7 @@ public class VotingTest extends ActivityInstrumentationTestCase2<Voting> {
     private ListAdapter adapter;
     private Server server;
 
-    static final String PREFIX = "Number of votes: ";
+    private static final String PREFIX = "Number of votes: ";
     private String[] channels = { "ABC", "CNN", "ESPN", "Nickelodeon", "Comedy Central", "Sci Fi", "Weather Channel",
 	    "National Geographic" };
 
@@ -34,29 +34,33 @@ public class VotingTest extends ActivityInstrumentationTestCase2<Voting> {
 
 	setActivityInitialTouchMode(false);
 	activity = this.getActivity();
-	server = activity.getServer();
-	view = activity.getListView();
-	adapter = activity.getListAdapter();
+    }
+
+    public void testMockServer() {
+	server = new MockServer();
+	assertTrue(true);
     }
 
     public void testPreconditions() {
-	assertNotNull(view);
-	assertNotNull(adapter);
-	assertNotNull(server);
+	adapter = activity.getListAdapter();
 
+	// TODO: HACK!! Ensures that any server delays or pop-up toast delays don't prevent
+	// this code from completing ahead of the client, causing a failure at onPause() time.
+	try {
+	    Thread.sleep(500);
+	} catch (InterruptedException e) {
+	    e.printStackTrace();
+	}
+
+	server = activity.getServer();
 	server.waitForData();
 	assertEquals(channels.length, adapter.getCount());
     }
 
     public void testVote() {
-	// TODO: OK to remove this runOnUiThread if no longer needed. Here for example only.
-	Log.d("VotingTest", "PRE runOnUiThread");
-	activity.runOnUiThread(new Runnable() {
-	    public void run() {
-		Log.d("VotingTest", "IN runOnUiThread");
-	    }
-	});
-	Log.d("VotingTest", "POST runOnUiThread");
+	server = activity.getServer();
+	view = activity.getListView();
+	adapter = activity.getListAdapter();
 
 	// Vote on each available channel.
 
@@ -70,7 +74,7 @@ public class VotingTest extends ActivityInstrumentationTestCase2<Voting> {
 
 	    TouchUtils.clickView(this, llListItem);
 
-	    // TODO: HACK!!  Ensures that any server delays or pop-up toast delays don't prevent
+	    // TODO: HACK!! Ensures that any server delays or pop-up toast delays don't prevent
 	    // this code from completing ahead of the client, causing a failure at onPause() time.
 	    try {
 		Thread.sleep(500);
