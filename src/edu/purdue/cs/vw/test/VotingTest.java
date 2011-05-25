@@ -8,6 +8,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import edu.purdue.cs.vw.Voting;
+import edu.purdue.cs.vw.ServerMock;
 
 public class VotingTest extends ActivityInstrumentationTestCase2<Voting> {
     private Voting activity;
@@ -29,11 +30,11 @@ public class VotingTest extends ActivityInstrumentationTestCase2<Voting> {
 	activity = this.getActivity();
     }
 
-    public void testMockServer() {
-	MockServer server = new MockServer();
+    public void testServerMock() {
+	ServerMock server = new ServerMock();
 	activity.setServer(server);
 	
-	Log.d("VotingTest", "testMockServer start");
+	Log.d("VotingTest", "testServerMock start");
 
 	String[] channels = server.getChannels();
 
