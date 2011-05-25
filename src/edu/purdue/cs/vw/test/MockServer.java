@@ -6,39 +6,51 @@ import android.util.Log;
 import edu.purdue.cs.vw.Server;
 
 public class MockServer extends Server {
-    private String[] channels = { "ABC", "CNN", "ESPN", "Nickelodeon", "Comedy Central", "Sci Fi", "Weather Channel",
-    "National Geographic" };
+    private static final int NUM_CHANNELS = 100;
+    ArrayList<String> voteList;
+    ArrayList<String> votes;
+    String[] channels;
 
     MockServer() {
+	channels = new String[NUM_CHANNELS];
+	voteList = new ArrayList<String>();
+	votes = new ArrayList<String>();
+
+	for (int i = 0; i < NUM_CHANNELS; i++) {
+	    String channel = "Channel " + i;
+	    channels[i] = channel;
+	    voteList.add(channel);
+	    votes.add("0");
+	}
+    }
+
+    public String[] getChannels() {
+	return channels;
+    }
+
+    public int getNumChannels() {
+	return NUM_CHANNELS;
     }
 
     @Override
     public void vote(String name) {
-	Log.d("ServerTest", "vote " + name);
+	Log.d("MockServerTest", "vote " + name);
+	for (int i = 0; i < channels.length; i++)
+	    if (channels[i].equals(name)) {
+		votes.set(i, String.valueOf(Integer.parseInt(votes.get(i)) + 1));
+		break;
+	    }
     }
 
     @Override
     public ArrayList<String> getList() {
-	Log.d("ServerTest", "get");
-	ArrayList<String> voteList = new ArrayList<String>();
-	for (int i = 0; i < channels.length; i++) 
-	    voteList.add(channels[i]);
+	Log.d("MockServerTest", "get");
 	return voteList;
     }
 
     @Override
     public ArrayList<String> getCount() {
-	Log.d("ServerTest", "getCount");
-	ArrayList<String> votes = new ArrayList<String>();
-	for (int i = 0; i < channels.length; i++)
-	    votes.add("0");
+	Log.d("MockServerTest", "getCount");
 	return votes;
     }
-
-    @Override
-    public void waitForData() {
-	// TODO Auto-generated method stub
-	return;
-    }
-
 }

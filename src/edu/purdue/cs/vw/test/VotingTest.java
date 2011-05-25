@@ -7,18 +7,13 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import edu.purdue.cs.vw.Server;
 import edu.purdue.cs.vw.Voting;
 
 public class VotingTest extends ActivityInstrumentationTestCase2<Voting> {
     private Voting activity;
-    private ListView view;
     private ListAdapter adapter;
-    private Server server;
 
     private static final String PREFIX = "Number of votes: ";
-    private String[] channels = { "ABC", "CNN", "ESPN", "Nickelodeon", "Comedy Central", "Sci Fi", "Weather Channel",
-	    "National Geographic" };
 
     public VotingTest() {
 	super(Voting.class);
@@ -30,65 +25,67 @@ public class VotingTest extends ActivityInstrumentationTestCase2<Voting> {
 	super.setUp();
 	Log.d("VotingTest", "call to setup");
 
-	java.util.Arrays.sort(channels);
-
 	setActivityInitialTouchMode(false);
 	activity = this.getActivity();
     }
 
     public void testMockServer() {
-	server = new MockServer();
-	assertTrue(true);
+	MockServer server = new MockServer();
+	activity.setServer(server);
+	
+	Log.d("VotingTest", "testMockServer start");
+
+	String[] channels = server.getChannels();
+
+	activity.waitForData();
+	adapter = activity.getListAdapter();
+	assertEquals(server.getNumChannels(), adapter.getCount());
+	doVoting(channels);
     }
 
-    public void testPreconditions() {
+    public void testRealServer() {
+	String[] channels = { "ABC", "CNN", "ESPN", "Nickelodeon", "Comedy Central", "Sci Fi", "Weather Channel",
+		"National Geographic" };
+	java.util.Arrays.sort(channels);
+
+	activity.waitForData();
 	adapter = activity.getListAdapter();
-
-	// TODO: HACK!! Ensures that any server delays or pop-up toast delays don't prevent
-	// this code from completing ahead of the client, causing a failure at onPause() time.
-	try {
-	    Thread.sleep(500);
-	} catch (InterruptedException e) {
-	    e.printStackTrace();
-	}
-
-	server = activity.getServer();
-	server.waitForData();
 	assertEquals(channels.length, adapter.getCount());
+	doVoting(channels);
     }
 
-    public void testVote() {
-	server = activity.getServer();
-	view = activity.getListView();
+    private void doVoting(String[] channels) {
+	Log.d("VotingTest", "in testVote");
+	ListView view = activity.getListView();
 	adapter = activity.getListAdapter();
 
-	// Vote on each available channel.
+	activity.waitForData();
+	assertEquals(channels.length, adapter.getCount());
+	this.getInstrumentation().waitForIdleSync();
 
-	server.waitForData();
-	for (int i = 0; i < view.getCount(); i++) {
+	// Attempt to ensure the view is updated by scrolling to the bottom
+	// and back to the top.
+	TouchUtils.scrollToBottom(this, activity, view);
+	this.getInstrumentation().waitForIdleSync();
+	TouchUtils.scrollToTop(this, activity, view);
+	this.getInstrumentation().waitForIdleSync();
+
+	// Vote on each visible channel.
+	for (int i = 0; i < view.getChildCount(); i++) {
 	    LinearLayout llListItem;
 	    int countBefore, countAfter;
 
-	    llListItem = getListItemAndCheckChannel(i);
+	    llListItem = getListItemAndCheckChannel(view, i, channels);
 	    countBefore = getVoteCount(llListItem);
 
 	    TouchUtils.clickView(this, llListItem);
+	    this.getInstrumentation().waitForIdleSync();
+	    activity.waitForData();
 
-	    // TODO: HACK!! Ensures that any server delays or pop-up toast delays don't prevent
-	    // this code from completing ahead of the client, causing a failure at onPause() time.
-	    try {
-		Thread.sleep(500);
-	    } catch (InterruptedException e) {
-		e.printStackTrace();
-	    }
-
-	    llListItem = getListItemAndCheckChannel(i);
+	    llListItem = getListItemAndCheckChannel(view, i, channels);
 	    countAfter = getVoteCount(llListItem);
 	    assertEquals(countBefore + 1, countAfter);
 	}
-
-	// TODO: OK to remove. Use if keyboard navigation works and can be tested.
-	// this.sendKeys(KeyEvent.KEYCODE_DPAD_CENTER);
     }
 
     private int getVoteCount(LinearLayout llListItem) {
@@ -98,8 +95,7 @@ public class VotingTest extends ActivityInstrumentationTestCase2<Voting> {
 	return Integer.parseInt(detail.substring(PREFIX.length()));
     }
 
-    private LinearLayout getListItemAndCheckChannel(int i) {
-	Log.d("VotingTest", "list item " + i + "; channel " + channels[i]);
+    private LinearLayout getListItemAndCheckChannel(ListView view, int i, String[] channels) {
 	LinearLayout ll = (LinearLayout) view.getChildAt(i);
 	TextView tv = (TextView) ll.findViewById(edu.purdue.cs.vw.R.id.title);
 	String channel = tv.getText().toString();
